@@ -1,3 +1,5 @@
+pub mod meta;
+
 use std::time::Duration;
 
 use sea_orm::sqlx::sqlite::{

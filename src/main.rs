@@ -9,6 +9,7 @@ mod error;
 mod migration;
 mod output;
 mod service;
+mod shell;
 
 use clap::Parser;
 use tracing_subscriber::{EnvFilter, fmt};
@@ -41,5 +42,10 @@ async fn run(cli: Cli) -> AppResult<()> {
 fn init_tracing() {
     let filter =
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("warn,sqlx=off"));
-    let _ = fmt().with_env_filter(filter).with_target(false).try_init();
+    // 日志必须走 stderr：stdout 承载 JSON、`jump --print` 路径等机器可读输出
+    let _ = fmt()
+        .with_env_filter(filter)
+        .with_target(false)
+        .with_writer(std::io::stderr)
+        .try_init();
 }
