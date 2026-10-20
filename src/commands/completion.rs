@@ -50,10 +50,11 @@ pub fn generate_filtered(shell: Shell) -> Vec<u8> {
     }
 
     if matches!(shell, Shell::Zsh) {
-        // -V 指定未排序组，候选按 commands 数组声明顺序展示（全称紧随缩写）
+        // -V（不带组名）使该命令组不排序，候选按 commands 数组声明顺序展示；
+        // 注意不能写成 `-V pjman`：group/tag 位置错位会触发 bad substitution
         for line in &mut kept {
             if line.contains("_describe -t commands") {
-                *line = line.replace("_describe -t commands", "_describe -V pjman -t commands");
+                *line = line.replace("_describe -t commands", "_describe -V -t commands");
             }
         }
     }

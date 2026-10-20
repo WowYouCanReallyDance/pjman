@@ -64,7 +64,7 @@ fn aliases_visible_and_annotated() {
     // 全称候选保留原始描述
     assert!(zsh.contains("'workspace:工作空间管理'"));
     // 声明顺序中全称紧邻缩写，且 _describe 使用未排序组
-    assert!(zsh.contains("_describe -V pjman -t commands"));
+    assert!(zsh.contains("_describe -V -t commands"));
     let pos_workspace = zsh.find("'workspace:").unwrap();
     let pos_ws = zsh.find("'ws:=").unwrap();
     assert!(pos_ws > pos_workspace, "缩写 ws 应紧跟全称 workspace");
