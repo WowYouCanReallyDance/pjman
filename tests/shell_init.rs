@@ -58,11 +58,18 @@ fn hidden_complete_command_not_in_candidates() {
 fn aliases_visible_and_annotated() {
     let h = Harness::new();
     let zsh = h.run(&["completion", "zsh"]);
-    assert!(zsh.contains("'ws:workspace 的缩写'"));
-    assert!(zsh.contains("'c:create 的缩写'"));
+    // 缩写描述为简洁的 `= <全称>`，无冗余文案
+    assert!(zsh.contains("'ws:= workspace'"));
+    assert!(zsh.contains("'c:= create'"));
     // 全称候选保留原始描述
     assert!(zsh.contains("'workspace:工作空间管理'"));
+    // 声明顺序中全称紧邻缩写，且 _describe 使用未排序组
+    assert!(zsh.contains("_describe -V pjman -t commands"));
+    let pos_workspace = zsh.find("'workspace:").unwrap();
+    let pos_ws = zsh.find("'ws:=").unwrap();
+    assert!(pos_ws > pos_workspace, "缩写 ws 应紧跟全称 workspace");
 
     let fish = h.run(&["completion", "fish"]);
-    assert!(fish.contains("-a \"ws\" -d 'workspace 的缩写'"));
+    assert!(fish.contains("-a \"ws\" -d '= workspace'"));
+    assert!(fish.contains("-f -k -a \""));
 }

@@ -9,14 +9,16 @@ pub fn run(shell: Shell) {
     print!("{}", String::from_utf8_lossy(&generate_filtered(shell)));
 }
 
-/// 生成补全脚本：剔除隐藏命令候选，并把缩写候选的描述改写为「<全称> 的缩写」。
+/// 生成补全脚本，做三项文本级修正：
 ///
-/// clap_complete 4.6 的 AOT 生成器有两个缺口：
+/// 1. clap_complete 4.6 不过滤 `hide = true` 的子命令，剔除 `__complete` 候选；
+/// 2. 缩写候选描述统一为 `= <全称>`（无冗余文案，i18n 友好）；
+/// 3. zsh/fish 默认按字母排序候选，会把缩写排到全称前面；
+///    zsh 用 `_describe -V`（未排序组）、fish 用 `complete -k`（保持定义顺序），
+///    使全称与其缩写按脚本中的声明顺序相邻显示。
 ///
-/// 1. 不过滤 `hide = true` 的子命令，内部命令 `__complete` 会泄漏到 TAB 候选；
-/// 2. visible alias 候选直接复用主命令描述，全称与缩写两行无法区分。
-///
-/// 两者都在这里做文本级修正；路由分支与函数定义保留（不产生候选）。
+/// bash/powershell/elvish 的排序由 shell 自身控制，无保序接口，维持字母序。
+/// 路由分支与函数定义保留（不产生候选）。
 pub fn generate_filtered(shell: Shell) -> Vec<u8> {
     let mut cmd = Cli::command();
     let aliases = collect_aliases(&cmd);
@@ -29,6 +31,7 @@ pub fn generate_filtered(shell: Shell) -> Vec<u8> {
         .lines()
         .filter(|line| !is_hidden_candidate(shell, line))
         .map(|line| annotate_alias(shell, line, &aliases))
+        .map(|line| keep_declared_order(shell, &line))
         .collect();
 
     if matches!(shell, Shell::Bash) {
@@ -46,7 +49,25 @@ pub fn generate_filtered(shell: Shell) -> Vec<u8> {
         }
     }
 
+    if matches!(shell, Shell::Zsh) {
+        // -V 指定未排序组，候选按 commands 数组声明顺序展示（全称紧随缩写）
+        for line in &mut kept {
+            if line.contains("_describe -t commands") {
+                *line = line.replace("_describe -t commands", "_describe -V pjman -t commands");
+            }
+        }
+    }
+
     kept.join("\n").into_bytes()
+}
+
+/// fish：命令候选行加 `-k`（--keep-order），保持脚本声明顺序而非字母序
+fn keep_declared_order(shell: Shell, line: &str) -> String {
+    if matches!(shell, Shell::Fish) && line.contains("-f -a \"") && !line.contains(" -k ") {
+        line.replace("-f -a \"", "-f -k -a \"")
+    } else {
+        line.to_owned()
+    }
 }
 
 /// 判断某行是否为隐藏命令 `__complete` 的可见候选
@@ -83,9 +104,9 @@ fn collect_aliases(cmd: &clap::Command) -> BTreeMap<String, String> {
     map
 }
 
-/// 把缩写候选行的描述替换为「<全称> 的缩写」
+/// 把缩写候选行的描述替换为 `= <全称>`
 fn annotate_alias(shell: Shell, line: &str, aliases: &BTreeMap<String, String>) -> String {
-    let annotation = |canonical: &str| format!("{canonical} 的缩写");
+    let annotation = |canonical: &str| format!("= {canonical}");
 
     match shell {
         // 'ws:工作空间管理' \
