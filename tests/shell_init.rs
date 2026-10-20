@@ -41,3 +41,28 @@ fn completion_scripts_generate() {
         assert!(!out.is_empty(), "{shell} 补全脚本不应为空");
     }
 }
+
+#[test]
+fn hidden_complete_command_not_in_candidates() {
+    let h = Harness::new();
+    for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
+        let out = h.run(&["completion", shell]);
+        assert!(
+            !out.contains("动态补全候选查询"),
+            "{shell} 补全中不应出现隐藏命令 __complete 的候选"
+        );
+    }
+}
+
+#[test]
+fn aliases_visible_and_annotated() {
+    let h = Harness::new();
+    let zsh = h.run(&["completion", "zsh"]);
+    assert!(zsh.contains("'ws:workspace 的缩写'"));
+    assert!(zsh.contains("'c:create 的缩写'"));
+    // 全称候选保留原始描述
+    assert!(zsh.contains("'workspace:工作空间管理'"));
+
+    let fish = h.run(&["completion", "fish"]);
+    assert!(fish.contains("-a \"ws\" -d 'workspace 的缩写'"));
+}

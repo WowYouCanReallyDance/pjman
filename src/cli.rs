@@ -34,15 +34,15 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 pub enum Command {
     /// 全局可用 tag 管理
-    #[command(alias = "tg", subcommand)]
+    #[command(visible_alias = "tg", subcommand)]
     Tags(TagsCmd),
 
     /// 工作空间管理
-    #[command(alias = "ws", subcommand)]
+    #[command(visible_alias = "ws", subcommand)]
     Workspace(WorkspaceCmd),
 
     /// 项目管理
-    #[command(alias = "pj", subcommand)]
+    #[command(visible_alias = "pj", subcommand)]
     Project(ProjectCmd),
 
     /// 输出 shell 集成脚本（jump 函数 + 补全）
@@ -129,7 +129,7 @@ pub enum CompleteKind {
 #[derive(Subcommand, Debug)]
 pub enum TagsCmd {
     /// 添加全局可用 tag
-    #[command(alias = "a")]
+    #[command(visible_alias = "a")]
     Add {
         /// tag 列表，如 `OpenSrc License=MIT,BSD3.0`
         #[arg(required = true)]
@@ -137,7 +137,7 @@ pub enum TagsCmd {
     },
 
     /// 删除全局 tag（默认被引用时拒绝）
-    #[command(alias = "rm")]
+    #[command(visible_alias = "rm")]
     Remove {
         /// `key` 或 `key=value`
         #[arg(required = true)]
@@ -149,7 +149,7 @@ pub enum TagsCmd {
     },
 
     /// 列出全局可用 tag
-    #[command(alias = "ls")]
+    #[command(visible_alias = "ls")]
     List {
         /// 仅列出指定 key
         #[arg(long, value_name = "KEY")]
@@ -162,7 +162,7 @@ pub enum TagsCmd {
 #[derive(Subcommand, Debug)]
 pub enum WorkspaceCmd {
     /// 创建实体 workspace（无名称时创建单个 ws-<uuidv7> 并设为默认）
-    #[command(alias = "c")]
+    #[command(visible_alias = "c")]
     Create {
         /// workspace 名称（可多个）；为空时创建单个默认 ws
         names: Vec<String>,
@@ -180,7 +180,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 将已存在的目录登记为 workspace
-    #[command(alias = "a")]
+    #[command(visible_alias = "a")]
     Add {
         /// 目录路径
         path: PathBuf,
@@ -194,7 +194,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 列出 workspace
-    #[command(alias = "ls")]
+    #[command(visible_alias = "ls")]
     List {
         /// 按 tag 过滤
         #[arg(long = "tag", value_name = "TAG", num_args = 1..)]
@@ -206,7 +206,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 更新 workspace 的 tag
-    #[command(alias = "up")]
+    #[command(visible_alias = "up")]
     Update {
         /// workspace 名称
         name: String,
@@ -216,7 +216,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 重命名 workspace（同步 DefaultTags 首值）
-    #[command(alias = "rn")]
+    #[command(visible_alias = "rn")]
     Rename {
         /// 旧名称
         #[arg(value_name = "OLD")]
@@ -227,7 +227,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 注销 workspace（默认保留磁盘目录）
-    #[command(alias = "rm")]
+    #[command(visible_alias = "rm")]
     Remove {
         /// workspace 名称
         name: String,
@@ -238,7 +238,7 @@ pub enum WorkspaceCmd {
     },
 
     /// 跳转到 workspace 目录
-    #[command(alias = "jp")]
+    #[command(visible_alias = "jp")]
     Jump {
         /// workspace 名称或选择器
         target: String,
@@ -260,7 +260,7 @@ pub enum WorkspaceCmd {
 #[derive(Subcommand, Debug)]
 pub enum ProjectCmd {
     /// 在 workspace 内扁平创建 project 目录
-    #[command(alias = "c")]
+    #[command(visible_alias = "c")]
     Create {
         /// project 名称（默认 pj-<uuidv7>）
         name: Option<String>,
@@ -273,7 +273,7 @@ pub enum ProjectCmd {
     },
 
     /// 将已存在的任意外部目录登记为 project
-    #[command(alias = "a")]
+    #[command(visible_alias = "a")]
     Add {
         /// 项目目录路径
         path: PathBuf,
@@ -290,7 +290,7 @@ pub enum ProjectCmd {
     },
 
     /// 列出 project
-    #[command(alias = "ls")]
+    #[command(visible_alias = "ls")]
     List {
         /// 列出所有 workspace 的 project
         #[arg(long)]
@@ -305,7 +305,7 @@ pub enum ProjectCmd {
     },
 
     /// 更新 project 的 tag
-    #[command(alias = "up")]
+    #[command(visible_alias = "up")]
     Update {
         /// project 名称
         name: String,
@@ -319,7 +319,7 @@ pub enum ProjectCmd {
     },
 
     /// 重命名 project（同步 DefaultTags 首值）
-    #[command(alias = "rn")]
+    #[command(visible_alias = "rn")]
     Rename {
         #[arg(value_name = "NAME")]
         name: String,
@@ -332,7 +332,7 @@ pub enum ProjectCmd {
     },
 
     /// 注销 project（默认保留磁盘目录）
-    #[command(alias = "rm")]
+    #[command(visible_alias = "rm")]
     Remove {
         /// project 名称
         name: String,
@@ -347,7 +347,7 @@ pub enum ProjectCmd {
     },
 
     /// 将 project 移动到另一个 workspace（默认连磁盘目录一起移动）
-    #[command(alias = "mv")]
+    #[command(visible_alias = "mv")]
     Move {
         /// project 名称
         name: String,
@@ -362,7 +362,7 @@ pub enum ProjectCmd {
     },
 
     /// 跳转到 project 目录
-    #[command(alias = "jp")]
+    #[command(visible_alias = "jp")]
     Jump {
         /// project 名称
         name: String,

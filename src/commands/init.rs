@@ -1,7 +1,7 @@
-use clap::CommandFactory;
-use clap_complete::{Shell, generate};
+use clap_complete::Shell;
 
-use crate::cli::{Cli, InitShell};
+use crate::cli::InitShell;
+use crate::commands::completion::generate_filtered;
 use crate::error::AppResult;
 use crate::shell::init::wrapper;
 
@@ -16,9 +16,10 @@ pub fn run(shell: InitShell) -> AppResult<()> {
     print!("{}", wrapper(name).expect("shell 模板缺失"));
 
     // 拼接静态补全脚本，eval 一次同时安装包装函数与补全
-    let mut buf = Vec::new();
-    generate(comp_shell, &mut Cli::command(), "pjman", &mut buf);
-    println!("{}", String::from_utf8_lossy(&buf));
+    println!(
+        "{}",
+        String::from_utf8_lossy(&generate_filtered(comp_shell))
+    );
 
     match shell {
         InitShell::Bash => eprintln!("\n# 安装：echo 'eval \"$(pjman init bash)\"' >> ~/.bashrc"),
